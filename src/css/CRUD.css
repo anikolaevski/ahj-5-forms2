@@ -1,0 +1,147 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+  width: 100%;
+}
+
+table:not(.CRUDNoStyle) {
+  padding: 5px 10px 5px 10px;
+  border-collapse: collapse;
+  border: 1px solid #bbb;
+}
+
+tr:not(.CRUDNoStyle) {
+  padding: 5px 10px 5px 10px;
+  border-collapse: collapse;
+  border: 1px solid #bbb;
+}
+
+td:not(.CRUDNoStyle):not(.actionCol) {
+  padding: 5px 10px 5px 10px;
+  border-collapse: collapse;
+  border: 1px solid #bbb;
+}
+
+th:not(.CRUDNoStyle) {
+  padding: 5px 10px 5px 10px;
+  border-collapse: collapse;
+  border: 1px solid #bbb;
+}
+
+th {
+  background-color: #ccc;
+}
+
+.CRUDalignTextLeft {
+  text-align: left;
+}
+
+.CRUDtableHeader {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.CRUDbtn {
+  width: 1.6rem;
+  height: 1.6rem;
+  background-size: cover;
+}
+
+.CRUDAddButton {
+  background-image: url('../img/w128h1281380984320add13.png');
+}
+
+.CRUDRowbtn {
+  width: 1.2rem;
+  height: 1.2rem;
+  background-size: cover;
+}
+
+.actionCol {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: center;
+  border: none;
+  border-style: none;
+}
+
+.CRUDEditButton {
+  background-image: url('../img/w128h1281380984696edit3.png');
+}
+
+.CRUDDeleteButton {
+  background-image: url('../img/w128h1281380984608delete3.png');
+}
+
+.CurrentEditRecord {
+  background-color: rgb(224, 224, 116);
+}
+
+.CRUDEditModalWindow {
+  position: absolute;
+}
+
+.CRUDBorderStyle {
+  padding: 0;
+  border-collapse: collapse;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  background-color: #fff;
+  opacity: 1;
+}
+
+.CRUDEditModalHeader {
+  min-height: 2rem;
+  background-color: #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border-radius: 10px 10px 0 0;
+}
+
+.CRUDEditModalTitle {
+  font-style: 1.2em;
+  font-weight: bold;
+  /* vertical-align: middle; */
+}
+
+.CRUDEditModalContent {
+  min-height: 4rem;
+  padding: 10px;
+}
+
+.CRUDEditModalFooter {
+  min-height: 2rem;
+  padding-bottom: 10px;
+}
+
+.CRUDNoStyle {
+  padding: 10px 0 10px 10px;
+  border: none;
+  border-style: none;
+  text-align: left;
+}
+
+.CRUDonFront {
+  z-index: 10;
+  opacity: 1;
+}
+
+.CRUDonBack {
+  z-index: -1;
+  opacity: 0.7;
+}
+
+.CRUDvalidityPopover {
+  position: absolute;
+  display: block;
+  color: red;
+  font-size: 0.8em;
+}
