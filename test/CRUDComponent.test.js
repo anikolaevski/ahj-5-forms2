@@ -4,10 +4,10 @@ const testData = {
   title: 'test',
   columns: [
     {
-      name: 'id', title: 'ID', classes: '', typ: 'id',
+      name: 'id', title: 'ID', applTyp: 'ident', customAttr: 'required', CSSclasses: '',
     },
     {
-      name: 'name', title: 'Название', classes: 'CRUDalignTextLeft', typ: '',
+      name: 'name', title: 'Название', applTyp: '', CSSclasses: 'CRUDalignTextLeft',
     },
   ],
   rows: [
@@ -28,42 +28,96 @@ test('should render self', () => {
   expect(!!document.querySelector(widget.myCRUDMainTable)).toEqual(true);
 });
 
-/*
-test('should open popover and verify its layout', () => {
+test('should open Modal Edit window by "Add" button', () => {
   document.body.innerHTML = '<div id="ComponentContainer"></div>';
   const container = document.querySelector('#ComponentContainer');
-  const widget = new PopOverComponent(container, { title: '', text: '' });
+  const widget = new CRUDComponent(container, testData);
   widget.bindToDOM();
-  const myPopover = document.querySelector(widget.myPopover);
-  const myButton = container.querySelector(widget.myPowerButton);
-  myButton.click();
-  expect(myPopover.classList.contains('my-popover-invisible')).toBe(false);
-  expect(myPopover.offsetwidth).toBe(myButton.offsetwidth);
-  expect(myPopover.offsetTop).toBe(myButton.offsetTop - myPopover.offsetHeight);
-  expect(myPopover.offsetLeft).toBe(myButton.offsetLeft);
+  document.querySelector(widget.myCRUDtAddButton).click();
+  const x = () => {
+    expect(!!document.querySelector(widget.myCRUDmodalEdit)).toEqual(true);
+  };
+  setTimeout(x, 500);
 });
 
-test('should close popover click on button', () => {
+test('should open Modal Edit window by "Edit" button', () => {
   document.body.innerHTML = '<div id="ComponentContainer"></div>';
   const container = document.querySelector('#ComponentContainer');
-  const widget = new PopOverComponent(container, { title: '', text: '' });
+  const widget = new CRUDComponent(container, testData);
   widget.bindToDOM();
-  const myPopover = document.querySelector(widget.myPopover);
-  const myButton = container.querySelector(widget.myPowerButton);
-  myButton.click(); // open
-  myButton.click(); // close via button
-  expect(myPopover.classList.contains('my-popover-invisible')).toBe(true);
+  document.querySelector('.CRUDEditButton').click();
+  const x = () => {
+    expect(!!document.querySelector('.CurrentEditRecord')).toEqual(true);
+    expect(!!document.querySelector(widget.myCRUDmodalEdit)).toEqual(true);
+  };
+  setTimeout(x, 500);
 });
 
-test('should close popover click on itself', () => {
+test('should mark curr record by "delete" button', () => {
   document.body.innerHTML = '<div id="ComponentContainer"></div>';
   const container = document.querySelector('#ComponentContainer');
-  const widget = new PopOverComponent(container, { title: '', text: '' });
+  const widget = new CRUDComponent(container, testData);
   widget.bindToDOM();
-  const myPopover = document.querySelector(widget.myPopover);
-  const myButton = container.querySelector(widget.myPowerButton);
-  myButton.click(); // open
-  myPopover.click(); // close via popover
-  expect(myPopover.classList.contains('my-popover-invisible')).toBe(true);
+  document.querySelector('.CRUDDeleteButton').click();
+  const x = () => {
+    expect(!!document.querySelector('.CurrentEditRecord')).toEqual(true);
+  };
+  setTimeout(x, 1000);
 });
-*/
+
+test('should switch back screen shadow', () => {
+  document.body.innerHTML = '<div id="ComponentContainer"></div>';
+  const container = document.querySelector('#ComponentContainer');
+  const widget = new CRUDComponent(container, testData);
+  widget.bindToDOM();
+  expect(!!document.querySelector('.CRUDonBack')).toEqual(false);
+  document.querySelector('.CRUDEditButton').click();
+  const x = () => {
+    expect(!!document.querySelector('.CRUDonBack')).toEqual(true);
+    document.querySelector(widget.myCRUDModalEditCancel).click();
+  };
+  const y = () => {
+    expect(!!document.querySelector('.CRUDonBack')).toEqual(false);
+  };
+  setTimeout(x, 500);
+  setTimeout(y, 1000);
+});
+
+test('should NOT switch back screen shadow', () => {
+  document.body.innerHTML = '<div id="ComponentContainer"></div>';
+  const container = document.querySelector('#ComponentContainer');
+  const widget = new CRUDComponent(container, testData);
+  widget.bindToDOM();
+  expect(!!document.querySelector('.CRUDonBack')).toEqual(false);
+  document.querySelector('.CRUDEditButton').click();
+  document.querySelector(widget.myCRUDModalEditConfirm).click();
+  // required fields, confirm will not happen
+  const x = () => {
+    expect(!!document.querySelector('.CRUDonBack')).toEqual(true);
+  };
+  setTimeout(x, 500);
+});
+
+test('back screen shadow by cascadeSetVisible()', () => {
+  document.body.innerHTML = '<div id="ComponentContainer"></div>';
+  const container = document.querySelector('#ComponentContainer');
+  const widget = new CRUDComponent(container, testData);
+  widget.bindToDOM();
+  widget.cascadeSetVisible(
+    document.querySelector(widget.myCRUDMainTable),
+    'CRUDonBack',
+    'CRUDonFront',
+  );
+  const x = () => {
+    expect(!!document.querySelector('.CRUDonBack')).toEqual(true);
+  };
+  setTimeout(x, 500);
+});
+
+test('should getIDStructure() return undefined', () => {
+  document.body.innerHTML = '<div id="ComponentContainer"></div>';
+  const container = document.querySelector('#ComponentContainer');
+  const widget = new CRUDComponent(container, testData);
+  widget.bindToDOM();
+  expect(widget.getIDStructure()).toEqual(undefined);
+});

@@ -9,6 +9,8 @@ export default class CRUDComponent {
     this.columns = columns;
     this.rows = rows;
     this.ident = '';
+    this.statusClass = '';
+    this.statusText = '';
   }
 
   get markup() {
@@ -26,6 +28,7 @@ export default class CRUDComponent {
       </table>
     </div>
     <div data-id="CRUD-modal-edit" class="CRUDEditModalWindow"></div>
+    <div data-id="CRUD-status-container"></div>
     `;
   }
 
@@ -37,9 +40,13 @@ export default class CRUDComponent {
     return '[data-id=CRUD-add-button]';
   }
 
-  get myCRUDtableHeader() {
-    return '[data-id=CRUD-tableHeader]';
+  get myCRUDstatusContainer() {
+    return '[data-id=CRUD-status-container]';
   }
+
+  // get myCRUDtableHeader() {
+  //   return '[data-id=CRUD-tableHeader]';
+  // }
 
   get myCRUDtheadrow() {
     return '[data-id=CRUD-theadrow]';
@@ -72,6 +79,7 @@ export default class CRUDComponent {
   bindToDOM() {
     this.parentEl.innerHTML = this.markup;
     this.redrawDataTable();
+    this.showStatus();
   }
 
   // prepare data content for Modal dialog box
@@ -97,6 +105,7 @@ export default class CRUDComponent {
 
   // Open Modal dialog box
   showEditModal(EditRec, title) {
+    const self = this;
     const myCRUDmodalEdit = this.parentEl.querySelector(this.myCRUDmodalEdit);
     myCRUDmodalEdit.innerHTML = `
     <form action="/" method="post" class="CRUDBorderStyle">
@@ -125,71 +134,57 @@ export default class CRUDComponent {
       const FieldName = this.columns[k].name;
       const FieldTitle = this.columns[k].title;
       const FieldValue = EditRec[FieldName];
-      const FieldAttr = this.columns[k].attr;
+      const FieldAttr = this.columns[k].customAttr;
       const InputDataId = `CRUD-edit-${FieldName}`;
-      const errText = this.columns[k].err;
+      const constFieldInputTyp = this.columns[k].inputTyp;
       let tx = '';
       tx += `<td class="CRUDNoStyle"><label for "${InputDataId}">${FieldTitle}</label></td>`;
-      tx += `<td class="CRUDNoStyle"><input data-id="${InputDataId}" type="text" ${FieldAttr} value="${FieldValue}"></td>`;
+      tx += `<td class="CRUDNoStyle"><input data-id="${InputDataId}" type="${constFieldInputTyp}" ${FieldAttr} value="${FieldValue}"></td>`;
       CRUDEditModalContentTr.innerHTML += tx;
-      // field validity check
-      const fld = CRUDEditModalContentTr.querySelector(`[data-id=${InputDataId}]`);
-      if (fld) {
-        fld.addEventListener('input', () => {
-          if (fld.checkValidity()) {
-            this.cleanupErrMessages();
-          }
-        });
-        fld.addEventListener('focusout', () => {
-          if (fld.checkValidity()) {
-            this.cleanupErrMessages();
-          }
-        });
-        fld.addEventListener('invalid', () => {
-          // eslint-disable-next-line no-alert
-          const CRUDvalidityPopover = document.createElement('span');
-          const elPos = fld.getBoundingClientRect();
-          myCRUDmodalEdit.appendChild(CRUDvalidityPopover);
-          CRUDvalidityPopover.classList.add('CRUDvalidityPopover', 'CRUDonFront');
-          CRUDvalidityPopover.innerText = `${errText}`;
-          CRUDvalidityPopover.style.top = `${elPos.Top + fld.offsetHeight - 200}px`;
-          CRUDvalidityPopover.style.left = `${elPos.Left}px`;
-        });
-        fld.addEventListener('focusin', () => {
-          this.cleanupErrMessages();
-        });
-      }
     }
-    // render Modal buttons: "Confirm"
-    const myCRUDModalEditConfirm = this.parentEl.querySelector(this.myCRUDModalEditConfirm);
-    myCRUDModalEditConfirm.addEventListener('click', (event) => {
-      event.preventDefault();
-      const myCurrentEditRecord = this.parentEl.querySelector(this.myCurrentEditRecord);
-      if (myCurrentEditRecord) {
-        const { identColumn, currentRecID } = this.getIDStructure();
-        const rec = this.rows.find((o) => o[identColumn] === currentRecID);
-        for (const col of this.columns) {
-          const FieldName = col.name;
-          const InputDataElement = myCRUDmodalEdit.querySelector(`[data-id=CRUD-edit-${FieldName}]`);
-          rec[FieldName] = InputDataElement.value;
+    this.parentEl.querySelector(`${this.myCRUDmodalEdit} form`).addEventListener('submit',
+      // eslint-disable-next-line func-names
+      function (evt) {
+        evt.preventDefault();
+        if (!this.checkValidity()) {
+          // === Form is not valid ===
+          const notValidElement = this.elements.find((el) => !el.validity.valid);
+          notValidElement.focus();
+          notValidElement.reportValidity();
+        } else {
+          // === Form is valid ===
+          const myCurrentEditRecord = self.parentEl.querySelector(self.myCurrentEditRecord);
+          if (myCurrentEditRecord) {
+            const { identColumn, currentRecID } = self.getIDStructure();
+            const rec = self.rows.find((o) => o[identColumn] === currentRecID);
+            for (const col of self.columns) {
+              const FieldName = col.name;
+              const InputDataElement = myCRUDmodalEdit.querySelector(`[data-id=CRUD-edit-${FieldName}]`);
+              rec[FieldName] = InputDataElement.value;
+            }
+          } else {
+            const rec = {};
+            for (const col of self.columns) {
+              const FieldName = col.name;
+              const InputDataElement = myCRUDmodalEdit.querySelector(`[data-id=CRUD-edit-${FieldName}]`);
+              rec[FieldName] = InputDataElement.value;
+            }
+            self.rows.push(rec);
+          }
+          self.statusClass = 'CRUDSuccess';
+          self.statusText = 'Запись сохранена';
+          self.bindToDOM();
         }
-      } else {
-        const rec = {};
-        for (const col of this.columns) {
-          const FieldName = col.name;
-          const InputDataElement = myCRUDmodalEdit.querySelector(`[data-id=CRUD-edit-${FieldName}]`);
-          rec[FieldName] = InputDataElement.value;
-        }
-        this.rows.push(rec);
-      }
-      this.bindToDOM();
-    });
+      });
     // render Modal buttons: "Cancel"
     const myCRUDModalEditCancel = this.parentEl.querySelector(this.myCRUDModalEditCancel);
     myCRUDModalEditCancel.addEventListener('click', (event) => {
       event.preventDefault();
+      this.statusClass = 'CRUDNeutral';
+      this.statusText = 'Запись не сохранена';
       this.bindToDOM();
     });
+    // Shadow the background screen
     const myCRUDMainTable = this.parentEl.querySelector(this.myCRUDMainTable);
     this.cascadeSetVisible(myCRUDMainTable, 'CRUDonBack', 'CRUDonFront');
     this.cascadeSetVisible(myCRUDmodalEdit, 'CRUDonFront', 'CRUDonBack');
@@ -208,10 +203,10 @@ export default class CRUDComponent {
     const myCRUDtbody = this.parentEl.querySelector(this.myCRUDtbody);
     // render table columns
     for (const col of this.columns) {
-      if (col.typ.includes('ident')) {
+      if (col.applTyp.includes('ident')) {
         this.ident = col.name;
       }
-      if (!col.typ.includes('hidden')) {
+      if (!col.applTyp.includes('hidden')) {
         const th = document.createElement('th');
         myCRUDtheadrow.appendChild(th);
         th.innerText = col.title;
@@ -226,12 +221,12 @@ export default class CRUDComponent {
       tr.setAttribute('data-id', `Data_Row_${row[this.ident]}`);
       myCRUDtbody.appendChild(tr);
       for (const col of this.columns) {
-        if (!col.typ.includes('hidden')) {
+        if (!col.applTyp.includes('hidden')) {
           const td = document.createElement('td');
           tr.appendChild(td);
           td.innerText = row[col.name];
-          if (col.classes) {
-            const cList = col.classes.split(' ');
+          if (col.CSSclasses) {
+            const cList = col.CSSclasses.split(' ');
             for (const cl of cList) {
               td.classList.add(cl);
             }
@@ -272,9 +267,11 @@ export default class CRUDComponent {
               this.rows.splice(recIndex, 1);
             }
           }
+          this.statusClass = 'CRUDNeutral';
+          this.statusText = 'Запись удалена';
           this.bindToDOM();
         };
-        setTimeout(doDelete, 500);
+        setTimeout(doDelete, 200);
       });
     }
   }
@@ -292,23 +289,35 @@ export default class CRUDComponent {
   getIDStructure() {
     if (this.ident) {
       const myCurrentEditRecord = this.parentEl.querySelector(this.myCurrentEditRecord);
-      const currentRecID = myCurrentEditRecord.getAttribute('data-id');
-      if (currentRecID) {
-        const id = currentRecID.replace('Data_Row_', '');
-        return {
-          identColumn: this.ident,
-          currentRecID: id,
-        };
+      if (myCurrentEditRecord) {
+        const currentRecID = myCurrentEditRecord.getAttribute('data-id');
+        if (currentRecID) {
+          const id = currentRecID.replace('Data_Row_', '');
+          return {
+            identColumn: this.ident,
+            currentRecID: id,
+          };
+        }
       }
     }
     return undefined;
   }
 
-  cleanupErrMessages() {
-    const allInvalids = this.parentEl.querySelectorAll('.CRUDvalidityPopover');
-    for (const el of allInvalids) {
-      // eslint-disable-next-line no-unused-expressions
-      el.remove;
+  showStatus() {
+    if (this.statusClass) {
+      // Populate status string
+      const StatusContainer = this.parentEl.querySelector(this.myCRUDstatusContainer);
+      const CRUDstatus = document.createElement('div');
+      StatusContainer.appendChild(CRUDstatus);
+      CRUDstatus.setAttribute('data-id', 'CRUD-status-string');
+      CRUDstatus.classList.add(this.statusClass);
+      CRUDstatus.innerText = this.statusText;
+      const removeStatus = () => {
+        StatusContainer.innerHTML = '';
+        this.statusClass = '';
+        this.statusText = '';
+      };
+      setTimeout(removeStatus, 2000); // 2b deleted after 2 sec
     }
   }
 }

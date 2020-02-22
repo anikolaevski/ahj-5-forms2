@@ -145,3 +145,18 @@ th {
   color: red;
   font-size: 0.8em;
 }
+
+.CRUDSuccess {
+  margin-top: 1rem;
+  color: green;
+}
+
+.CRUDFailure {
+  margin-top: 1rem;
+  color: red;
+}
+
+.CRUDNeutral {
+  margin-top: 1rem;
+  color: black;
+}
