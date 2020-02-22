@@ -1,26 +1,27 @@
 import puppetteer from 'puppeteer';
 
-const childProcess = require('child_process');
+// const childProcess = require('child_process');
 
-let server = null;
+// let server = null;
 
 jest.setTimeout(30000); // default puppeteer timeout
 describe('INN/OGRN form', () => {
   let browser = null;
   let page = null;
-  const baseUrl = 'http://localhost:9001';
+  // const baseUrl = 'http://localhost:9001';
+  const baseUrl = 'http://localhost:8080';
   beforeAll(async () => {
-    server = await childProcess.fork(`${__dirname}/test-server.js`);
-    await new Promise((resolve, reject) => {
-      server.on('error', () => {
-        reject();
-      });
-      server.on('message', (message) => {
-        if (message === 'ok') {
-          resolve();
-        }
-      });
-    });
+    // server = await childProcess.fork(`${__dirname}/test-server.js`);
+    // await new Promise((resolve, reject) => {
+    //   server.on('error', () => {
+    //     reject();
+    //   });
+    //   server.on('message', (message) => {
+    //     if (message === 'ok') {
+    //       resolve();
+    //     }
+    //   });
+    // });
 
     browser = await puppetteer.launch({
       // Опции в методе launch нужно закомментировать при запуске в CI.
@@ -32,7 +33,7 @@ describe('INN/OGRN form', () => {
   });
   afterAll(async () => {
     await browser.close();
-    server.kill();
+    // server.kill();
   });
   // test code here
   // test start
