@@ -137,9 +137,12 @@ export default class CRUDComponent {
       const FieldAttr = this.columns[k].customAttr;
       const InputDataId = `CRUD-edit-${FieldName}`;
       const constFieldInputTyp = this.columns[k].inputTyp;
+      const FieldWidth = this.columns[k].inputSize;
       let tx = '';
       tx += `<td class="CRUDNoStyle"><label for "${InputDataId}">${FieldTitle}</label></td>`;
-      tx += `<td class="CRUDNoStyle"><input data-id="${InputDataId}" type="${constFieldInputTyp}" ${FieldAttr} value="${FieldValue}"></td>`;
+      tx += `<td class="CRUDNoStyle"><input data-id="${InputDataId}"`;
+      tx += (FieldWidth) ? ` size="${FieldWidth}"` : '';
+      tx += ` type="${constFieldInputTyp}" ${FieldAttr} value="${FieldValue}"></td>`;
       CRUDEditModalContentTr.innerHTML += tx;
     }
     this.parentEl.querySelector(`${this.myCRUDmodalEdit} form`).addEventListener('submit',
@@ -266,9 +269,12 @@ export default class CRUDComponent {
             if (typeof (recIndex) === 'number') {
               this.rows.splice(recIndex, 1);
             }
+            this.statusClass = 'CRUDNeutral';
+            this.statusText = 'Запись удалена';
+          } else {
+            this.statusClass = 'CRUDNeutral';
+            this.statusText = 'Отказ от удаления';
           }
-          this.statusClass = 'CRUDNeutral';
-          this.statusText = 'Запись удалена';
           this.bindToDOM();
         };
         setTimeout(doDelete, 200);
